@@ -23,7 +23,7 @@ genome::genome(uint32_t num_inputs, uint32_t num_outputs)
         node *target = find_for_key(&nodes, i);
         for(uint32_t j=0; j<num_inputs; j++)
         {
-            target->back_links.push_back(&links[index]);
+            target->back_links.insert({index, &links[index]});
             index++;
         }
     }
@@ -47,7 +47,7 @@ std::vector<uint32_t> genome::get_id_outputs()
 
 void genome::set_input(uint32_t id_input, double input)
 {
-    //nodes[id_input].set_output(input);
+    find_for_key(&nodes, id_input)->set_output(input);
 }
 
 void genome::step_forward(std::vector<double> *outputs)
@@ -63,14 +63,14 @@ void genome::back_recursive_nodes(uint32_t id_node)
 {
     std::vector<input_weight> parametres;
     node *target = find_for_key(&nodes, id_node);
-    for(uint32_t i=0; i<target->back_links.size(); i++)
+    for(auto& pair : target->back_links)
     {
-        link* target_link = target->back_links[i];
+        link* target_link = pair.second;
 
         if(!target_link->is_enabled()) continue;
 
         uint32_t back_node_id = target_link->get_node_in();
-        node *back_node = find_for_key(&nodes, id_node);
+        node *back_node = find_for_key(&nodes, back_node_id);
         if(back_node->output == -1.0)
         {
             back_recursive_nodes(back_node_id);
@@ -78,7 +78,7 @@ void genome::back_recursive_nodes(uint32_t id_node)
         parametres.push_back({target_link->get_weight(), back_node->output});
     }
 
-    target->calculate_output(parametres);
+    if(target->type != node::INPUT) target->calculate_output(parametres);
 }
 
 void genome::reset_all()

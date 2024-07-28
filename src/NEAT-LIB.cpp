@@ -6,13 +6,25 @@ num_population(num_population),
 num_outputs(num_outputs),
 num_inputs(num_inputs)
 {
-    node_counter = num_outputs + num_inputs - 1;
-    link_counter = num_inputs*num_outputs -1 ;
+    node_counter = num_outputs + num_inputs;
     population = (genome*)malloc(num_population*sizeof(genome));
     pointer = nullptr;
     for(uint32_t i=0; i<num_population; i++)
     {
         population[i] = genome(num_inputs, num_outputs);
+    }
+
+    link_counter = 0;
+    for(uint32_t i=0; i<num_inputs; i++)
+    {
+        std::string in = std::to_string(i); 
+        for(uint32_t j=num_inputs; j<num_outputs+num_outputs; j++)
+        {
+            std::string out = std::to_string(j);
+            std::string key = in + "-" + out;
+            innovation_map.insert({out, link_counter});
+            link_counter++;
+        }
     }
 }
 
@@ -48,4 +60,26 @@ bool neat::predict(std::vector<double> inputs, std::vector<double> *outputs)
     pointer->step_forward(outputs);
 
     return true;
+}
+
+void neat::mutate()
+{
+    genome* ptr;
+    for(uint32_t i=0; i<num_population; i++)
+    {
+        ptr = &population[i];
+        genome_mutation(ptr);
+    }
+}
+
+void neat::genome_mutation(genome* target)
+{
+
+}
+
+void neat::create_node(genome* target)
+{
+
+    
+
 }

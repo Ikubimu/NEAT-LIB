@@ -19,6 +19,6 @@ class node
     double output;
     void calculate_output(std::vector<input_weight> input);
     void set_output(double input);
-    std::vector<link*> back_links;
+    std::unordered_map<uint32_t, link*> back_links;
 
 };
