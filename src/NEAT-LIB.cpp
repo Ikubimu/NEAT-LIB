@@ -17,6 +17,7 @@ num_inputs(num_inputs)
     link_counter = 0;
     for(uint32_t i=0; i<num_inputs; i++)
     {
+        id_inputs.push_back(num_outputs+i);
         std::string in = std::to_string(i); 
         for(uint32_t j=num_inputs; j<num_outputs+num_outputs; j++)
         {
@@ -55,7 +56,7 @@ bool neat::predict(std::vector<double> inputs, std::vector<double> *outputs)
 
     for(uint32_t i=0; i<num_inputs; i++)
     {
-        pointer->set_input(i, inputs[i]);
+        pointer->set_input(id_inputs[i], inputs[i]);
     }
     pointer->step_forward(outputs);
 

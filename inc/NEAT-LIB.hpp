@@ -13,6 +13,7 @@ class neat
     uint32_t num_population;
     uint32_t num_inputs;
     uint32_t num_outputs;
+    std::vector<uint32_t> id_inputs;
     uint32_t node_counter;
     uint32_t link_counter;
     void genome_mutation(genome* target);
