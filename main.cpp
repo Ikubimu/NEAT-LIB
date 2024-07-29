@@ -2,7 +2,7 @@
 
 using namespace std;
 
-#define POPULATION 100
+#define POPULATION 5
 
 int main()
 {
@@ -10,6 +10,7 @@ int main()
     std::vector<double> outputs;
     neat XOR(POPULATION, 2, 4);
     
+    XOR.mutate();
     for(uint32_t j=0; j<POPULATION; j++)
     {
         outputs.clear();

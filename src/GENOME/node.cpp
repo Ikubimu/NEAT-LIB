@@ -23,3 +23,14 @@ void node::calculate_output(std::vector<input_weight> inputs)
     }
     output = RELU(activation_input);
 }
+
+void node::add_back_link(link* new_link)
+{
+    uint32_t index = new_link->innovation_num;
+    back_links.insert({index, new_link});
+}
+
+void node::delete_back_link(uint32_t innovation_num)
+{
+    back_links.erase(innovation_num);
+}

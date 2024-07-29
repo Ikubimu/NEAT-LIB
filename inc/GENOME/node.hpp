@@ -21,4 +21,7 @@ class node
     void set_output(double input);
     std::unordered_map<uint32_t, link*> back_links;
 
+    void add_back_link(link* new_link);
+    void delete_back_link(uint32_t innovation_num);
+
 };

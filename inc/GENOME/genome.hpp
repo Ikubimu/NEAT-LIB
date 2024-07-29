@@ -11,6 +11,12 @@ class genome
     void step_forward(std::vector<double> *outputs);
     void reset_all();
 
+    uint32_t get_rand_id();
+    link* get_link_by_id(uint32_t id);
+    void new_node(uint32_t id_node);
+    void new_link(uint32_t node_in, uint32_t node_out, uint32_t innovation_num);
+    void delete_link(uint32_t innovation_num);
+
     private:
     uint32_t num_outputs;
     std::vector<uint32_t> id_outputs;

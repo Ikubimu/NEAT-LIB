@@ -58,7 +58,6 @@ void genome::back_recursive_nodes(uint32_t id_node)
     for(auto& pair : target->back_links)
     {
         link* target_link = pair.second;
-
         if(!target_link->is_enabled()) continue;
         uint32_t back_node_id = target_link->get_node_in();
         node *back_node = find_for_key(&nodes, back_node_id);
@@ -79,3 +78,35 @@ void genome::reset_all()
         pair.second.set_output(-1.0);
     }
 }
+
+uint32_t genome::get_rand_id()
+{
+    uint32_t size = links.size();
+    return rand_uint(size);
+}
+
+link* genome::get_link_by_id(uint32_t id)
+{
+    return find_for_key(&links, id);
+}
+
+void genome::new_node(uint32_t id_node)
+{
+    nodes.insert({id_node, node(node::HIDDEN, id_node)});
+}
+
+void genome::new_link(uint32_t node_in, uint32_t node_out, uint32_t innovation_num)
+{
+    links.insert({innovation_num, link(node_in, node_out, innovation_num)});
+    node* target = find_for_key(&nodes, node_out);
+    target->add_back_link(find_for_key(&links, innovation_num));
+}
+
+void genome::delete_link(uint32_t innovation_num)
+{
+    link* target = find_for_key(&links, innovation_num);
+    node* target_node = find_for_key(&nodes, target->node_out);
+    target_node->delete_back_link(innovation_num);
+    links.erase(innovation_num);
+}
+

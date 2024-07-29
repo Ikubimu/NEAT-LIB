@@ -10,7 +10,6 @@ class link
     bool is_enabled();
     double get_weight();
 
-    private:
     uint32_t node_in;
     uint32_t node_out;
     bool enable;

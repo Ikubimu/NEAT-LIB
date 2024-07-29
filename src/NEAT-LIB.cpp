@@ -75,12 +75,23 @@ void neat::mutate()
 
 void neat::genome_mutation(genome* target)
 {
-
+    //double prob = rand_double(0.0, 100.0);
+    create_node(target);
 }
 
 void neat::create_node(genome* target)
 {
+    uint32_t target_id = target->get_rand_id();
+    link* target_link = target->get_link_by_id(target_id);
+    target->new_node(node_counter);
+    
+    target->new_link(node_counter, target_link->node_out, link_counter);
+    link_counter++;
+    target->new_link(target_link->node_in, node_counter, link_counter);
+    target->delete_link(target_id);
 
+    link_counter++;
+    node_counter++;
     
 
 }
