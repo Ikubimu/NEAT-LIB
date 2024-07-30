@@ -14,8 +14,10 @@ class node
     };
 
     node(node_t type, uint32_t id_node);
+    node(node_t type, uint32_t id_node, uint32_t layer);
     uint32_t id_node;
     node_t type;
+    uint32_t layer;
     double output;
     void calculate_output(std::vector<input_weight> input);
     void set_output(double input);

@@ -11,14 +11,18 @@ class genome
     void step_forward(std::vector<double> *outputs);
     void reset_all();
 
-    uint32_t get_rand_id();
+    uint32_t get_rand_id_link();
     link* get_link_by_id(uint32_t id);
-    void new_node(uint32_t id_node);
+    uint32_t get_rand_id_node();
+    node* get_node_by_id(uint32_t id);
+    void new_node(uint32_t id_node, uint32_t layer);
     void new_link(uint32_t node_in, uint32_t node_out, uint32_t innovation_num);
     void delete_link(uint32_t innovation_num);
+    uint32_t get_num_hidden();
 
     private:
     uint32_t num_outputs;
+    uint32_t num_hidden;
     std::vector<uint32_t> id_outputs;
     std::unordered_map<uint32_t, node> nodes;
     std::unordered_map<uint32_t, link> links;

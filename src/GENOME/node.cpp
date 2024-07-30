@@ -5,8 +5,22 @@ node::node(node_t type, uint32_t id_node)
 type(type),
 id_node(id_node)
 {
+    if(type == OUTPUT) layer = 1000;
+    else 
+    {
+        layer = 0;
+    }
     output = -1.0;
 
+}
+
+node::node(node_t type, uint32_t id_node, uint32_t layer)
+:
+type(type),
+id_node(id_node),
+layer(layer)
+{
+    output = -1.0;
 }
 
 void node::set_output(double input)

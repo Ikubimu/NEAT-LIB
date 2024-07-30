@@ -5,7 +5,7 @@ genome::genome(uint32_t num_inputs, uint32_t num_outputs)
 :
 num_outputs(num_outputs)
 {
-    
+    num_hidden = 0;
     uint32_t index = 0;
     uint32_t i =0;
     for(i; i<num_outputs; i++)
@@ -79,10 +79,12 @@ void genome::reset_all()
     }
 }
 
-uint32_t genome::get_rand_id()
+uint32_t genome::get_rand_id_link()
 {
-    uint32_t size = links.size();
-    return rand_uint(size);
+    uint32_t iter = rand_uint(links.size());
+    auto it = links.begin();
+    std::advance(it, iter);
+    return it->first;
 }
 
 link* genome::get_link_by_id(uint32_t id)
@@ -90,9 +92,23 @@ link* genome::get_link_by_id(uint32_t id)
     return find_for_key(&links, id);
 }
 
-void genome::new_node(uint32_t id_node)
+uint32_t genome::get_rand_id_node()
 {
-    nodes.insert({id_node, node(node::HIDDEN, id_node)});
+    uint32_t iter = rand_uint(nodes.size());
+    auto it = nodes.begin();
+    std::advance(it, iter);
+    return it->first;
+}
+
+node* genome::get_node_by_id(uint32_t id)
+{
+    return find_for_key(&nodes, id);
+}
+
+void genome::new_node(uint32_t id_node, uint32_t layer)
+{
+    nodes.insert({id_node, node(node::HIDDEN, id_node, layer)});
+    num_hidden++;
 }
 
 void genome::new_link(uint32_t node_in, uint32_t node_out, uint32_t innovation_num)
@@ -108,5 +124,10 @@ void genome::delete_link(uint32_t innovation_num)
     node* target_node = find_for_key(&nodes, target->node_out);
     target_node->delete_back_link(innovation_num);
     links.erase(innovation_num);
+}
+
+uint32_t genome::get_num_hidden()
+{
+    return num_hidden;
 }
 
