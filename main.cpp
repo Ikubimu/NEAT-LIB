@@ -2,7 +2,7 @@
 
 using namespace std;
 
-#define POPULATION 5
+#define POPULATION 100
 
 int main()
 {

@@ -21,7 +21,10 @@ class neat
     void add_rand_link(genome* target);
 
     void add_link(genome* target, uint32_t id_node_a, uint32_t id_node_b);
-    
+    void toggle_link(genome* target);
+    void change_rand_weight(genome* target);
+    void change_regular_weight(genome* target);
+
     std::unordered_map<std::string, uint32_t> innovation_map;
     void add_key_link(uint32_t id_a, uint32_t id_b);
     bool check_key_link(uint32_t id_a, uint32_t id_b);

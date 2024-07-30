@@ -75,9 +75,21 @@ void neat::mutate()
 
 void neat::genome_mutation(genome* target)
 {
-    //double prob = rand_double(0.0, 100.0);
-    create_node(target);
-    add_rand_link(target);
+    double prob = rand_double(0.0, 100.0);
+    if(prob<5.0) create_node(target);
+
+    prob = rand_double(0.0, 100.0);
+    if(prob<10.0)add_rand_link(target);
+
+    prob = rand_double(0.0, 100.0);
+    if(prob<1.0) toggle_link(target);
+
+    prob = rand_double(0.0, 100.0);
+    if(prob<20.0) change_rand_weight(target);
+
+    prob = rand_double(0.0, 100.0);
+    if(prob<85.0) change_regular_weight(target);
+
 }
 
 void neat::create_node(genome* target)
@@ -165,4 +177,36 @@ bool neat::check_key_link(uint32_t id_a, uint32_t id_b)
     }
 
     return false;
+}
+
+void neat::toggle_link(genome* target)
+{
+    uint32_t target_id = target->get_rand_id_link();
+    link* target_link = target->get_link_by_id(target_id);
+
+    target_link->enable = !(target_link->enable);
+}
+
+void neat::change_rand_weight(genome* target)
+{
+    uint32_t target_id = target->get_rand_id_link();
+    link* target_link = target->get_link_by_id(target_id);
+
+    target_link->weight = rand_double(-1.0, 1.0);
+}
+
+void neat::change_regular_weight(genome* target)
+{
+    uint32_t target_id = target->get_rand_id_link();
+    link* target_link = target->get_link_by_id(target_id);
+
+    double value = rand_double(-0.3, 0.3);
+    double weight = target_link->weight + value;
+
+    if(weight < -1.0 || weight > 1.0)
+    {
+        weight += (-2.0)*value;
+    }
+
+    target_link->weight = weight;
 }
