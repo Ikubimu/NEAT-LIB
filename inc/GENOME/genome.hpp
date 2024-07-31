@@ -19,10 +19,15 @@ class genome
     void new_link(uint32_t node_in, uint32_t node_out, uint32_t innovation_num);
     void delete_link(uint32_t innovation_num);
     uint32_t get_num_hidden();
+    std::unordered_map<uint32_t, link>* get_link_map();
+    uint32_t get_inn_range();
+    uint32_t get_links_size();
 
     private:
     uint32_t num_outputs;
     uint32_t num_hidden;
+    double fitness, adj_fitness;
+    uint32_t inn_range;
     std::vector<uint32_t> id_outputs;
     std::unordered_map<uint32_t, node> nodes;
     std::unordered_map<uint32_t, link> links;

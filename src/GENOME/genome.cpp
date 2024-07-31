@@ -7,7 +7,8 @@ num_outputs(num_outputs)
 {
     num_hidden = 0;
     uint32_t index = 0;
-    uint32_t i =0;
+    uint32_t i = 0;
+    fitness = adj_fitness = 0;
     for(i; i<num_outputs; i++)
     {
         nodes.insert({i, node(node::OUTPUT, i)});
@@ -19,6 +20,7 @@ num_outputs(num_outputs)
             index++;
         }
     }
+    inn_range = index-1;
     for(i; i<num_outputs+num_inputs; i++)
     {
         nodes.insert({i, node(node::INPUT, i)});
@@ -114,6 +116,7 @@ void genome::new_node(uint32_t id_node, uint32_t layer)
 void genome::new_link(uint32_t node_in, uint32_t node_out, uint32_t innovation_num)
 {
     links.insert({innovation_num, link(node_in, node_out, innovation_num)});
+    inn_range = innovation_num;
     node* target = find_for_key(&nodes, node_out);
     target->add_back_link(find_for_key(&links, innovation_num));
 }
@@ -129,5 +132,20 @@ void genome::delete_link(uint32_t innovation_num)
 uint32_t genome::get_num_hidden()
 {
     return num_hidden;
+}
+
+std::unordered_map<uint32_t, link>* genome::get_link_map()
+{
+    return &links; 
+}
+
+uint32_t genome::get_inn_range()
+{
+    return inn_range;
+}
+
+uint32_t genome::get_links_size()
+{
+    return links.size();
 }
 
