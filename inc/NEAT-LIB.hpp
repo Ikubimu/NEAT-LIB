@@ -1,6 +1,6 @@
 
 #pragma once
-#include "GENOME/genome.hpp"
+#include "SPECIATION/speciation.hpp"
 
 class neat
 {
@@ -9,6 +9,8 @@ class neat
     bool set_genome(uint32_t genome_id);
     bool predict(std::vector<double> inputs, std::vector<double> *outputs);
     void mutate();
+    void configure_species();
+    void train_fitness(double fitness);
     private:
     uint32_t num_population;
     uint32_t num_inputs;
@@ -31,4 +33,5 @@ class neat
 
     genome* population;
     genome* pointer;
+    speciation* spc;
 };

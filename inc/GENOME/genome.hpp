@@ -12,6 +12,7 @@ class genome
     void reset_all();
 
     double get_fitness();
+    double get_adj_fitness();
     void set_fitness(double fit);
     void set_adj_fitness(double fit);
 

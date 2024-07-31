@@ -21,8 +21,11 @@ int main()
         {
             cout<<outputs[i]<<" ";
         }
+        XOR.train_fitness(2.0);
         cout<<endl;
     }
+
+    XOR.configure_species();
     
     return 0;
 }

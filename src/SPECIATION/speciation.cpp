@@ -5,7 +5,7 @@ speciation::speciation(genome* population, uint32_t num_population)
 population(population),
 num_population(num_population)
 {
-    threshold = 3.0;
+    threshold = 0.3;
 }
 
 void speciation::set_species()
@@ -25,9 +25,10 @@ void speciation::set_species()
         pivot = species[i][0];
         for(uint32_t j=0; j<all.size(); j++)
         {
-            if(calculate_distance(pivot, all[i])<threshold)
+            double dis = calculate_distance(pivot, all[j]);
+            if(dis<threshold)
             {
-                species[i].push_back(all[i]);
+                species[i].push_back(all[j]);
                 all.erase(all.begin()+j);
                 j--;
             } 
@@ -57,7 +58,7 @@ void speciation::set_adj_fitness()
 double speciation::calculate_adj_fitness(genome* pivot, uint32_t specie_id)
 {
     double fit = pivot->get_fitness();
-    double sum = 0;
+    double sum = 0.0001;
     genome* ptr;
     for(uint32_t i=0; i<species[specie_id].size(); i++)
     {
@@ -74,17 +75,17 @@ double speciation::calculate_distance(genome* pivot, genome* ptr)
     genome* aux;
     uint32_t low_range;
     std::unordered_map<uint32_t, link>* map_link;
-    if(ptr->get_inn_range() > pivot->get_inn_range())
+    if(ptr->get_inn_range() < pivot->get_inn_range())
     {
         map_link = pivot->get_link_map();
         aux = ptr;
-        low_range = pivot->get_inn_range();
+        low_range = ptr->get_inn_range();
     }
     else
     {
         map_link = ptr->get_link_map();
         aux = pivot;
-        low_range = ptr->get_inn_range();
+        low_range = pivot->get_inn_range();
     }
 
     uint32_t excess = 0;
@@ -93,10 +94,9 @@ double speciation::calculate_distance(genome* pivot, genome* ptr)
     std::vector<double> weight_difference;
     
     auto it = map_link->begin();
-    uint32_t i = 0;
-    uint32_t inn_num = it->first;
-    while(it != map_link->end() || inn_num<=low_range)
+    for(;;)
     {
+        uint32_t inn_num = it->first;
         link* link_ptr = aux->get_link_by_id(inn_num);
         if(link_ptr != nullptr)
         {
@@ -104,21 +104,17 @@ double speciation::calculate_distance(genome* pivot, genome* ptr)
             double w2 = it->second.weight;
             weight_difference.push_back(abs((w1-w2)));
         }
-        else
-        {
-            disjoin++;
-        }
-        i++;
+        else if(inn_num > low_range) excess++;
+        else disjoin++;
+
         std::advance(it, 1);
-        inn_num = it->first;
+        if(it == map_link->end()) break;
     }
 
-    disjoin += aux->get_links_size() - weight_difference.size();
-    excess = map_link->size() - i;
     n = (double)std::max(aux->get_links_size(), (uint32_t)map_link->size());
     double mean = calculate_mean(&weight_difference);
 
-    return (excess/n)*C1 + (disjoin/n)*C2 +  mean*C3;
+    return (double)(excess/n)*C1 + (double)(disjoin/n)*C2 +  mean*C3;
 }
 
 double calculate_mean(std::vector<double> *v)

@@ -27,6 +27,7 @@ num_inputs(num_inputs)
             link_counter++;
         }
     }
+    spc = new speciation(population, num_population);
 }
 
 
@@ -209,4 +210,16 @@ void neat::change_regular_weight(genome* target)
     }
 
     target_link->weight = weight;
+}
+
+void neat::configure_species()
+{
+    spc->set_species();
+    
+    spc->set_adj_fitness();
+}
+
+void neat::train_fitness(double fitness)
+{
+    pointer->set_fitness(fitness);
 }

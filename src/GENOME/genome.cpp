@@ -163,3 +163,8 @@ double genome::get_fitness()
 {
     return fitness;
 }
+
+double genome::get_adj_fitness()
+{
+    return adj_fitness;
+}

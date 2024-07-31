@@ -2,9 +2,9 @@
 
 #include "../GENOME/genome.hpp"
 
-#define C1 1.0
-#define C2 1.0
-#define C3 0.4
+#define C1 1.2
+#define C2 1.2
+#define C3 0.6
 
 class speciation
 {
