@@ -30,6 +30,5 @@ class neat
     bool check_key_link(uint32_t id_a, uint32_t id_b);
 
     genome* population;
-    std::vector<std::vector<genome*>> species;
     genome* pointer;
 };

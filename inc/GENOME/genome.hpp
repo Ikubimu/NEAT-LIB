@@ -11,6 +11,10 @@ class genome
     void step_forward(std::vector<double> *outputs);
     void reset_all();
 
+    double get_fitness();
+    void set_fitness(double fit);
+    void set_adj_fitness(double fit);
+
     uint32_t get_rand_id_link();
     link* get_link_by_id(uint32_t id);
     uint32_t get_rand_id_node();

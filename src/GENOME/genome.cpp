@@ -149,3 +149,17 @@ uint32_t genome::get_links_size()
     return links.size();
 }
 
+void genome::set_fitness(double fit)
+{
+    fitness = fit;
+}
+
+void genome::set_adj_fitness(double fit)
+{
+    adj_fitness = fit;
+}
+
+double genome::get_fitness()
+{
+    return fitness;
+}
