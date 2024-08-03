@@ -168,3 +168,19 @@ double genome::get_adj_fitness()
 {
     return adj_fitness;
 }
+
+
+void genome::propagate_layer(uint32_t inter_layer, uint32_t id_node)
+{
+    node* target = find_for_key(&nodes, id_node);
+    if(target->layer == inter_layer)
+    {
+        target->layer = target->layer -1;
+
+        for(auto& pair : target->back_links)
+        {
+            uint32_t id_back_node = pair.second->node_in;
+            propagate_layer(inter_layer-1, id_back_node); 
+        }
+    }
+}

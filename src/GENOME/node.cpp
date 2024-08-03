@@ -5,7 +5,7 @@ node::node(node_t type, uint32_t id_node)
 type(type),
 id_node(id_node)
 {
-    if(type == OUTPUT) layer = 1000;
+    if(type == OUTPUT) layer = 999999999;
     else 
     {
         layer = 0;

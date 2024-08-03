@@ -28,6 +28,8 @@ class genome
     uint32_t get_inn_range();
     uint32_t get_links_size();
 
+    void propagate_layer(uint32_t inter_layer, uint32_t id_node);
+
     private:
     uint32_t num_outputs;
     uint32_t num_hidden;

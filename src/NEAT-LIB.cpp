@@ -111,6 +111,8 @@ void neat::create_node(genome* target)
     
     target->delete_link(target_id);
 
+    target->propagate_layer(layer-1, link_node_in);
+
     node_counter++;
 }
 
