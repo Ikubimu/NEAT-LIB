@@ -1,7 +1,7 @@
 #include "../../inc/GENOME/genome.hpp"
 
 
-genome::genome(uint32_t num_inputs, uint32_t num_outputs)
+genome::genome(uint32_t num_inputs, uint32_t num_outputs, bool fully_connected)
 :
 num_outputs(num_outputs)
 {
@@ -12,12 +12,15 @@ num_outputs(num_outputs)
     for(i; i<num_outputs; i++)
     {
         nodes.insert({i, node(node::OUTPUT, i)});
-        node *target = find_for_key(&nodes, i);
-        for(uint32_t j=num_outputs; j<(num_inputs+num_outputs); j++)
+        if(fully_connected)
         {
-            links.insert({index, link(j, i, index)});
-            target->back_links.insert({index, find_for_key(&links, index)});
-            index++;
+            node *target = find_for_key(&nodes, i);
+            for(uint32_t j=num_outputs; j<(num_inputs+num_outputs); j++)
+            {
+                links.insert({index, link(j, i, index)});
+                target->back_links.insert({index, find_for_key(&links, index)});
+                index++;
+            }
         }
     }
     inn_range = index-1;
@@ -25,6 +28,17 @@ num_outputs(num_outputs)
     {
         nodes.insert({i, node(node::INPUT, i)});
     }
+}
+
+genome::genome(const genome* copy)
+{
+    num_outputs = copy->num_outputs;
+    num_hidden = copy->num_hidden;
+    fitness = copy->fitness;
+    adj_fitness = copy->adj_fitness;
+    inn_range = copy->inn_range;
+    nodes = copy->nodes;
+    links = copy->links;
 }
 
 template<typename K, typename V>
@@ -116,7 +130,7 @@ void genome::new_node(uint32_t id_node, uint32_t layer)
 void genome::new_link(uint32_t node_in, uint32_t node_out, uint32_t innovation_num)
 {
     links.insert({innovation_num, link(node_in, node_out, innovation_num)});
-    inn_range = innovation_num;
+    if(inn_range<innovation_num) inn_range= innovation_num;
     node* target = find_for_key(&nodes, node_out);
     target->add_back_link(find_for_key(&links, innovation_num));
 }
@@ -127,6 +141,25 @@ void genome::delete_link(uint32_t innovation_num)
     node* target_node = find_for_key(&nodes, target->node_out);
     target_node->delete_back_link(innovation_num);
     links.erase(innovation_num);
+}
+
+void genome::new_node_link(genome* parent, link* n_link)
+{
+    uint32_t node_in = n_link->node_in;
+    uint32_t node_out = n_link->node_out;
+    if(get_node_by_id(node_in) == nullptr)
+    {
+        uint32_t layer = parent->get_node_by_id(node_in)->layer;
+        new_node(node_in, layer);
+
+    }
+    if(get_node_by_id(node_out) == nullptr)
+    {
+        uint32_t layer = parent->get_node_by_id(node_out)->layer;
+        new_node(node_out, layer);
+    }
+    uint32_t inn_num = n_link->innovation_num;
+    new_link(node_in, node_out, inn_num);
 }
 
 uint32_t genome::get_num_hidden()

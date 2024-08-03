@@ -7,7 +7,7 @@ num_outputs(num_outputs),
 num_inputs(num_inputs)
 {
     node_counter = num_outputs + num_inputs;
-    population = (genome*)malloc(num_population*sizeof(genome));
+    population = new genome[num_population];
     pointer = nullptr;
     for(uint32_t i=0; i<num_population; i++)
     {
@@ -27,7 +27,7 @@ num_inputs(num_inputs)
             link_counter++;
         }
     }
-    spc = new speciation(population, num_population);
+    spc = new speciation(population, num_population, 5, num_inputs, num_outputs);
 }
 
 
@@ -77,10 +77,10 @@ void neat::mutate()
 void neat::genome_mutation(genome* target)
 {
     double prob = rand_double(0.0, 100.0);
-    if(prob<5.0) create_node(target);
+    if(prob<10.0) create_node(target);
 
     prob = rand_double(0.0, 100.0);
-    if(prob<10.0)add_rand_link(target);
+    if(prob<15.0)add_rand_link(target);
 
     prob = rand_double(0.0, 100.0);
     if(prob<1.0) toggle_link(target);
@@ -217,9 +217,21 @@ void neat::configure_species()
     spc->set_species();
     
     spc->set_adj_fitness();
+
+    genome* new_population = spc->set_new_population();
+    delete[] population;
+    population = new_population;
+
 }
 
 void neat::train_fitness(double fitness)
 {
     pointer->set_fitness(fitness);
+}
+
+void neat::test()
+{
+    genome n(population[6]);
+    uint32_t id = n.get_rand_id_link();
+    std::cout<<(int)id<<std::endl;
 }

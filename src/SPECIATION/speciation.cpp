@@ -1,11 +1,18 @@
 #include "../../inc/SPECIATION/speciation.hpp"
 
-speciation::speciation(genome* population, uint32_t num_population)
+speciation::speciation(genome* population, uint32_t num_population, uint32_t target, uint32_t num_inputs, uint32_t num_outputs)
 :
 population(population),
-num_population(num_population)
+num_population(num_population),
+target(target),
+cross(num_inputs, num_outputs)
 {
-    threshold = 0.3;
+    threshold = 0.5;
+}
+
+genome* speciation::set_new_population()
+{
+    return cross.new_population(&species, &offspring, num_population);
 }
 
 void speciation::set_species()
@@ -45,13 +52,29 @@ void speciation::set_species()
 
 void speciation::set_adj_fitness()
 {
+    offspring.clear();
+    std::vector<double> averages;
+    std::vector<double> total;
+    std::vector<double> fitnesses;
+
     for(uint32_t i=0; i<species.size(); i++)
     {
+        fitnesses.clear();
         for(uint32_t j=0; j<species[i].size(); j++)
         {
             genome* ptr = species[i][j];
-            ptr->set_adj_fitness(calculate_adj_fitness(ptr, i));
+            double fitness = calculate_adj_fitness(ptr, i);
+            fitnesses.push_back(fitness);
+            total.push_back(fitness);
+            ptr->set_adj_fitness(fitness);
         }
+        averages.push_back(calculate_mean(&fitnesses));
+    }
+    averages.push_back(calculate_mean(&total));
+    for(uint32_t i=0; i<(averages.size()-1); i++)
+    {
+        offspring.push_back(round(averages[i]*species[i].size()/averages[(averages.size()-1)]));
+        std::cout<<"of: "<<species[i].size()<<"  "<<(int)offspring[i]<<std::endl;
     }
 }
 

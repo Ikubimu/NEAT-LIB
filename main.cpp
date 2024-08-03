@@ -2,7 +2,7 @@
 
 using namespace std;
 
-#define POPULATION 100
+#define POPULATION 500
 
 int main()
 {
@@ -10,22 +10,27 @@ int main()
     std::vector<double> outputs;
     neat XOR(POPULATION, 2, 4);
     
-    XOR.mutate();
-    for(uint32_t j=0; j<POPULATION; j++)
+    for(uint32_t i=0; i<1000; i++)
     {
-        outputs.clear();
-        XOR.set_genome(j);
-        XOR.predict(inputs, &outputs);
-        cout<<"Number: "<<j<<" Output: ";
-        for(uint32_t i=0; i<outputs.size(); i++)
+        XOR.mutate();
+        for(uint32_t j=0; j<POPULATION; j++)
         {
-            cout<<outputs[i]<<" ";
+            outputs.clear();
+            XOR.set_genome(j);
+            XOR.predict(inputs, &outputs);
+            cout<<"Number: "<<j<<" Output: ";
+            for(uint32_t i=0; i<outputs.size(); i++)
+            {
+                cout<<outputs[i]<<" ";
+            }
+            XOR.train_fitness(rand_double(0.0, 5.0));
+            cout<<endl;
         }
-        XOR.train_fitness(2.0);
-        cout<<endl;
-    }
+        XOR.configure_species();
 
-    XOR.configure_species();
+    }
+    
+
     
     return 0;
 }

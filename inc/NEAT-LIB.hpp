@@ -11,6 +11,7 @@ class neat
     void mutate();
     void configure_species();
     void train_fitness(double fitness);
+    void test();
     private:
     uint32_t num_population;
     uint32_t num_inputs;

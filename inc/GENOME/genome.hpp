@@ -6,7 +6,10 @@
 class genome
 {
     public:
-    genome(uint32_t num_inputs, uint32_t num_outputs);
+    genome(uint32_t num_inputs, uint32_t num_outputs, bool fully_connected = true);
+    genome(const genome* copy);
+    genome() = default;
+
     void set_input(uint32_t id_node, double input);
     void step_forward(std::vector<double> *outputs);
     void reset_all();
@@ -20,9 +23,12 @@ class genome
     link* get_link_by_id(uint32_t id);
     uint32_t get_rand_id_node();
     node* get_node_by_id(uint32_t id);
+
     void new_node(uint32_t id_node, uint32_t layer);
     void new_link(uint32_t node_in, uint32_t node_out, uint32_t innovation_num);
     void delete_link(uint32_t innovation_num);
+    void new_node_link(genome* parent, link* n_link);
+
     uint32_t get_num_hidden();
     std::unordered_map<uint32_t, link>* get_link_map();
     uint32_t get_inn_range();
