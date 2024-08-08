@@ -21,9 +21,10 @@ class node
     double output;
     void calculate_output(std::vector<input_weight> input);
     void set_output(double input);
-    std::unordered_map<uint32_t, link*> back_links;
+    std::vector<uint32_t> back_links;
+    std::unordered_map<uint32_t, link*> front_links;
 
-    void add_back_link(link* new_link);
+    void add_back_link(uint32_t innovation_num);
     void delete_back_link(uint32_t innovation_num);
 
 };

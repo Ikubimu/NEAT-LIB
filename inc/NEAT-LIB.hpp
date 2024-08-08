@@ -31,7 +31,7 @@ class neat
     void add_key_link(uint32_t id_a, uint32_t id_b);
     bool check_key_link(uint32_t id_a, uint32_t id_b);
 
-    genome* population;
+    std::vector<genome> population;
     genome* pointer;
-    speciation* spc;
+    speciation spc;
 };

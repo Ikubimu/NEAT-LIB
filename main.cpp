@@ -25,10 +25,12 @@ int main()
             {
                 cout<<outputs[i]<<" ";
             }
+            cout<<endl;
             */
             XOR.train_fitness(2.0);
         }
 
+        std::cout<<"over"<<std::endl;
         XOR.configure_species();
     }
     

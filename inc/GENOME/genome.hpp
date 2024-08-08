@@ -6,7 +6,11 @@
 class genome
 {
     public:
-    genome(uint32_t num_inputs, uint32_t num_outputs);
+    genome(uint32_t num_inputs, uint32_t num_outputs, uint32_t Id_pop);
+    genome(const genome* copy, uint32_t Id_pop);
+    genome() = default;
+
+    uint32_t Id_pop;
     void set_input(uint32_t id_node, double input);
     void step_forward(std::vector<double> *outputs);
     void reset_all();
@@ -28,16 +32,17 @@ class genome
     uint32_t get_inn_range();
     uint32_t get_links_size();
 
-    void propagate_layer(uint32_t inter_layer, uint32_t id_node);
+    void propagate_layer(uint32_t inter_layer);
+    void add_layer_id(uint32_t layer_id, uint32_t node_id);
 
     private:
     uint32_t num_outputs;
     uint32_t num_hidden;
     double fitness, adj_fitness;
     uint32_t inn_range;
-    std::vector<uint32_t> id_outputs;
     std::unordered_map<uint32_t, node> nodes;
     std::unordered_map<uint32_t, link> links;
+    std::vector<std::vector<uint32_t>> layers;
     void back_recursive_nodes(uint32_t id_node);
 };
 

@@ -1,14 +1,16 @@
 #include "../../inc/GENOME/genome.hpp"
 
 
-genome::genome(uint32_t num_inputs, uint32_t num_outputs)
+genome::genome(uint32_t num_inputs, uint32_t num_outputs, uint32_t Id_pop)
 :
-num_outputs(num_outputs)
+num_outputs(num_outputs), 
+Id_pop(Id_pop)
 {
     num_hidden = 0;
     uint32_t index = 0;
     uint32_t i = 0;
     fitness = adj_fitness = 0;
+    std::vector<uint32_t> outputs_layer, inputs_layer;
     for(i; i<num_outputs; i++)
     {
         nodes.insert({i, node(node::OUTPUT, i)});
@@ -16,15 +18,56 @@ num_outputs(num_outputs)
         for(uint32_t j=num_outputs; j<(num_inputs+num_outputs); j++)
         {
             links.insert({index, link(j, i, index)});
-            target->back_links.insert({index, find_for_key(&links, index)});
+            target->add_back_link(index);
             index++;
         }
+        outputs_layer.push_back(i);
     }
     inn_range = index-1;
     for(i; i<num_outputs+num_inputs; i++)
     {
         nodes.insert({i, node(node::INPUT, i)});
+        inputs_layer.push_back(i);
     }
+    layers.push_back(inputs_layer);
+    layers.push_back(outputs_layer);
+}
+
+genome::genome(const genome* copy, uint32_t Id_pop)
+:
+Id_pop(Id_pop)
+{
+    num_outputs = copy->num_outputs;
+    num_hidden = copy->num_hidden;
+    fitness = copy->fitness;
+    adj_fitness = copy->adj_fitness;
+    inn_range = copy->inn_range;
+    layers = copy->layers;
+    nodes = copy->nodes;
+    links = copy->links;
+
+    #if 0
+    for (const auto& link_pair : copy->links)
+    {
+        links.insert({link_pair.first, link_pair.second});
+    }
+
+    for (const auto& node_pair : copy->nodes)
+    {
+        nodes.insert({node_pair.first, node_pair.second});
+    }
+
+    for(uint32_t i=0; i<copy->layers.size(); i++)
+    {
+        std::vector<uint32_t> vect;
+        for(uint32_t j=0; j<copy->layers[i].size(); j++)
+        {
+            vect.push_back(copy->layers[i][j]);
+        }
+        layers.push_back(vect);
+    }
+    #endif
+
 }
 
 template<typename K, typename V>
@@ -57,19 +100,26 @@ void genome::back_recursive_nodes(uint32_t id_node)
 {
     std::vector<input_weight> parametres;
     node *target = find_for_key(&nodes, id_node);
-    for(auto& pair : target->back_links)
+    if(target->back_links.size() > 0)
     {
-        link* target_link = pair.second;
+    for(uint32_t i=0; i<target->back_links.size(); i++)
+    {
+        link* target_link = find_for_key(&links, target->back_links[i]);
         if(!target_link->is_enabled()) continue;
         uint32_t back_node_id = target_link->get_node_in();
         node *back_node = find_for_key(&nodes, back_node_id);
+        if(back_node == nullptr)
+        {
+            std::cout<<(int)back_node_id<<std::endl;
+            exit(0);
+        }
         if(back_node->output == -1.0)
         {
             back_recursive_nodes(back_node_id);
         }
         parametres.push_back({target_link->get_weight(), back_node->output});
     }
-
+    }
     if(target->type != node::INPUT) target->calculate_output(parametres);
 }
 
@@ -117,8 +167,9 @@ void genome::new_link(uint32_t node_in, uint32_t node_out, uint32_t innovation_n
 {
     links.insert({innovation_num, link(node_in, node_out, innovation_num)});
     inn_range = innovation_num;
+
     node* target = find_for_key(&nodes, node_out);
-    target->add_back_link(find_for_key(&links, innovation_num));
+    target->add_back_link(innovation_num);
 }
 
 void genome::delete_link(uint32_t innovation_num)
@@ -170,17 +221,21 @@ double genome::get_adj_fitness()
 }
 
 
-void genome::propagate_layer(uint32_t inter_layer, uint32_t id_node)
+void genome::propagate_layer(uint32_t inter_layer)
 {
-    node* target = find_for_key(&nodes, id_node);
-    if(target->layer == inter_layer)
+    std::vector<uint32_t> inter;
+    layers.insert(layers.begin()+inter_layer, inter);
+    for(uint32_t i=inter_layer+1; i<layers.size(); i++)
     {
-        target->layer = target->layer -1;
-
-        for(auto& pair : target->back_links)
+        for(uint32_t j=0; j<layers[i].size(); j++)
         {
-            uint32_t id_back_node = pair.second->node_in;
-            propagate_layer(inter_layer-1, id_back_node); 
+            node *target = find_for_key(&nodes, layers[i][j]);
+            target->layer = target->layer + 1;
         }
     }
+}
+
+void genome::add_layer_id(uint32_t layer_id, uint32_t node_id)
+{
+    layers[layer_id].push_back(node_id);
 }

@@ -4,14 +4,14 @@ neat::neat(uint32_t num_population, uint32_t num_inputs, uint32_t num_outputs)
 :
 num_population(num_population),
 num_outputs(num_outputs),
-num_inputs(num_inputs)
+num_inputs(num_inputs),
+spc(num_population, num_outputs, num_inputs)
 {
     node_counter = num_outputs + num_inputs;
-    population = (genome*)malloc(num_population*sizeof(genome));
     pointer = nullptr;
     for(uint32_t i=0; i<num_population; i++)
     {
-        population[i] = genome(num_inputs, num_outputs);
+        population.push_back(genome(num_inputs, num_outputs, i));
     }
 
     link_counter = 0;
@@ -27,7 +27,6 @@ num_inputs(num_inputs)
             link_counter++;
         }
     }
-    spc = new speciation(population, num_population);
 }
 
 
@@ -98,21 +97,19 @@ void neat::create_node(genome* target)
     uint32_t target_id = target->get_rand_id_link();
     link* target_link = target->get_link_by_id(target_id);
     
-    
+
     uint32_t link_node_in = target_link->node_in;
     uint32_t link_node_out = target_link->node_out;
+    node* node_in = target->get_node_by_id(link_node_in);
     node* node_out = target->get_node_by_id(link_node_out);
-    uint32_t layer = node_out->layer;
-
-    target->new_node(node_counter, (uint32_t)(layer-1));
-
+    uint32_t layer = node_in->layer;
+    target->new_node(node_counter, (uint32_t)(layer+1));
+    if(layer+1 == node_out->layer) target->propagate_layer(layer+1);
+    target->add_layer_id(layer+1, node_counter);
     add_link(target, node_counter, link_node_out);
     add_link(target, link_node_in, node_counter);
-    
+
     target->delete_link(target_id);
-
-    target->propagate_layer(layer-1, link_node_in);
-
     node_counter++;
 }
 
@@ -216,9 +213,23 @@ void neat::change_regular_weight(genome* target)
 
 void neat::configure_species()
 {
-    spc->set_species();
+    spc.set_species(&population);
+    std::cout<<"set"<<std::endl;
+    for(uint32_t i=0; i<spc.species.size(); i++)
+    {
+        std::cout<<(int)i<<": "<<spc.species[i].members.size()<<std::endl;
+    }
+    spc.set_adj_fitness();
+    for(uint32_t i=0; i<spc.species.size(); i++)
+    {
+        std::cout<<(int)spc.species[i].offspring<<std::endl;
+    }
+    std::cout<<"fit"<<std::endl;
+    std::vector<genome> new_population;
+    spc.set_new_population(&new_population);
+    std::cout<<"size: "<<new_population.size()<<std::endl;
+    population = new_population;
     
-    spc->set_adj_fitness();
 }
 
 void neat::train_fitness(double fitness)
