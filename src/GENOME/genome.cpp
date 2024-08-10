@@ -180,6 +180,39 @@ void genome::delete_link(uint32_t innovation_num)
     links.erase(innovation_num);
 }
 
+void genome::new_node_link(genome* parent, link* n_link)
+{
+    uint32_t node_in_id = n_link->node_in;
+    uint32_t node_out_id = n_link->node_out;
+    uint32_t layer_in;
+    node *node_in = get_node_by_id(node_in_id);
+    uint32_t layer_out;
+    node *node_out = get_node_by_id(node_out_id);
+
+    node_in == nullptr ? layer_in = parent->get_node_by_id(node_in_id)->layer : layer_in = node_in->layer;
+    
+    node_out == nullptr ? layer_out = parent->get_node_by_id(node_out_id)->layer : layer_out = node_out->layer;
+    
+    if(layer_in == layer_out || layer_in >= layers.size()-1 || layer_out >= layers.size()-1) return;
+
+    if(node_in == nullptr)
+    {
+        new_node(node_in_id, layer_in);
+        add_layer_id(layer_in, node_in_id);
+    }
+    if(node_out == nullptr)
+    {
+        new_node(node_out_id, layer_out);
+        add_layer_id(layer_out, node_out_id);
+    }
+
+    uint32_t inn_num = n_link->innovation_num;
+    layer_out > layer_in ? new_link(node_in_id, node_out_id, inn_num) : new_link(node_out_id, node_in_id, inn_num);
+    link* new_link = find_for_key(&links, inn_num);
+    new_link->copy_parametres(n_link);
+}
+
+
 uint32_t genome::get_num_hidden()
 {
     return num_hidden;
@@ -238,4 +271,27 @@ void genome::propagate_layer(uint32_t inter_layer)
 void genome::add_layer_id(uint32_t layer_id, uint32_t node_id)
 {
     layers[layer_id].push_back(node_id);
+}
+
+void genome::show_genome_path()
+{
+    for(uint32_t i=0; i<num_outputs; i++)
+    {
+        recursive_genome_path(i);
+    }
+}
+
+void genome::recursive_genome_path(uint32_t id_node)
+{
+    std::cout<<"("<<(int)id_node<<") ->";
+    node *target = find_for_key(&nodes, id_node);
+    for(uint32_t i=0; i<target->back_links.size(); i++)
+    {
+        link* target_link = find_for_key(&links, target->back_links[i]);
+        std::cout<<" w:"<<target_link->weight<<" ->";
+        if(!target_link->is_enabled()) continue;
+        uint32_t back_node_id = target_link->get_node_in();
+        recursive_genome_path(back_node_id);
+    }
+    std::cout<<"|"<<std::endl;
 }

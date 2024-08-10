@@ -9,6 +9,7 @@ class link
     uint32_t get_node_in();
     bool is_enabled();
     double get_weight();
+    void copy_parametres(link* copy);
 
     uint32_t node_in;
     uint32_t node_out;

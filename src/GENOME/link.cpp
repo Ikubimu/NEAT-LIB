@@ -26,3 +26,9 @@ double link::get_weight()
 {
     return weight;
 }
+
+void link::copy_parametres(link* copy)
+{
+    enable = copy->enable;
+    weight = copy->weight;
+}

@@ -43,12 +43,6 @@ void node::add_back_link(uint32_t innovation_num)
     back_links.push_back(innovation_num);
 }
 
-void node::add_front_link(link* new_link)
-{
-    uint32_t index = new_link->innovation_num;
-    front_links.insert({index, new_link});
-}
-
 void node::delete_back_link(uint32_t innovation_num)
 {
     auto it = std::find(back_links.begin(), back_links.end(), innovation_num);
@@ -56,9 +50,4 @@ void node::delete_back_link(uint32_t innovation_num)
     {
         back_links.erase(it);
     }
-}
-
-void node::delete_front_link(uint32_t innovation_num)
-{
-    front_links.erase(innovation_num);
 }

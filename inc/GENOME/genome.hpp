@@ -24,9 +24,12 @@ class genome
     link* get_link_by_id(uint32_t id);
     uint32_t get_rand_id_node();
     node* get_node_by_id(uint32_t id);
+
     void new_node(uint32_t id_node, uint32_t layer);
     void new_link(uint32_t node_in, uint32_t node_out, uint32_t innovation_num);
     void delete_link(uint32_t innovation_num);
+    void new_node_link(genome* parent, link* n_link);
+
     uint32_t get_num_hidden();
     std::unordered_map<uint32_t, link>* get_link_map();
     uint32_t get_inn_range();
@@ -34,6 +37,7 @@ class genome
 
     void propagate_layer(uint32_t inter_layer);
     void add_layer_id(uint32_t layer_id, uint32_t node_id);
+    void show_genome_path();
 
     private:
     uint32_t num_outputs;
@@ -44,6 +48,7 @@ class genome
     std::unordered_map<uint32_t, link> links;
     std::vector<std::vector<uint32_t>> layers;
     void back_recursive_nodes(uint32_t id_node);
+    void recursive_genome_path(uint32_t id_node);
 };
 
 template<typename K, typename V>

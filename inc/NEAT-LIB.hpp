@@ -7,10 +7,13 @@ class neat
     public:
     neat(uint32_t num_population, uint32_t num_inputs, uint32_t num_outputs);
     bool set_genome(uint32_t genome_id);
+    bool predict_train(std::vector<double> inputs, std::vector<double> *outputs);
     bool predict(std::vector<double> inputs, std::vector<double> *outputs);
     void mutate();
     void configure_species();
     void train_fitness(double fitness);
+    void test_crosover();
+
     private:
     uint32_t num_population;
     uint32_t num_inputs;
@@ -33,5 +36,6 @@ class neat
 
     std::vector<genome> population;
     genome* pointer;
+    genome* winner;
     speciation spc;
 };

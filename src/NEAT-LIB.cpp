@@ -5,10 +5,11 @@ neat::neat(uint32_t num_population, uint32_t num_inputs, uint32_t num_outputs)
 num_population(num_population),
 num_outputs(num_outputs),
 num_inputs(num_inputs),
-spc(num_population, num_outputs, num_inputs)
+spc(num_population, num_outputs, num_inputs, 6)
 {
     node_counter = num_outputs + num_inputs;
     pointer = nullptr;
+    winner = nullptr;
     for(uint32_t i=0; i<num_population; i++)
     {
         population.push_back(genome(num_inputs, num_outputs, i));
@@ -38,7 +39,7 @@ bool neat::set_genome(uint32_t genome_id)
     return true;
     
 }
-bool neat::predict(std::vector<double> inputs, std::vector<double> *outputs)
+bool neat::predict_train(std::vector<double> inputs, std::vector<double> *outputs)
 {
     if(pointer == nullptr)
     {
@@ -63,6 +64,31 @@ bool neat::predict(std::vector<double> inputs, std::vector<double> *outputs)
     return true;
 }
 
+bool neat::predict(std::vector<double> inputs, std::vector<double> *outputs)
+{
+    if(winner == nullptr)
+    {
+        std::cout<<"pointer_error";
+        return false;
+    }
+
+    if(inputs.size() != num_inputs)
+    {
+        std::cout<<"input_error";
+        return false;
+    }
+
+    winner->reset_all();
+
+    for(uint32_t i=0; i<num_inputs; i++)
+    {
+        winner->set_input(id_inputs[i], inputs[i]);
+    }
+    winner->step_forward(outputs);
+
+    return true;
+}
+
 void neat::mutate()
 {
     genome* ptr;
@@ -75,20 +101,35 @@ void neat::mutate()
 
 void neat::genome_mutation(genome* target)
 {
-    double prob = rand_double(0.0, 100.0);
-    if(prob<5.0) create_node(target);
+    uint32_t prob = rand_uint(1000000);
+    if(prob<100000) create_node(target);
 
-    prob = rand_double(0.0, 100.0);
-    if(prob<10.0)add_rand_link(target);
+    prob = rand_uint(1000000);
+    if(prob<100000)add_rand_link(target);
 
-    prob = rand_double(0.0, 100.0);
-    if(prob<1.0) toggle_link(target);
+    prob = rand_uint(1000000);
+    if(prob<100000)add_rand_link(target);
 
-    prob = rand_double(0.0, 100.0);
-    if(prob<20.0) change_rand_weight(target);
+    prob = rand_uint(1000000);
+    if(prob<10000) toggle_link(target);
 
-    prob = rand_double(0.0, 100.0);
-    if(prob<85.0) change_regular_weight(target);
+    prob = rand_uint(1000000);
+    if(prob<500000) change_rand_weight(target);
+
+    prob = rand_uint(1000000);
+    if(prob<500000) change_rand_weight(target);
+
+    prob = rand_uint(1000000);
+    if(prob<500000) change_rand_weight(target);
+
+    prob = rand_uint(1000000);
+    if(prob<850000) change_regular_weight(target);
+
+    prob = rand_uint(1000000);
+    if(prob<850000) change_regular_weight(target);
+
+    prob = rand_uint(1000000);
+    if(prob<850000) change_regular_weight(target);
 
 }
 
@@ -96,10 +137,10 @@ void neat::create_node(genome* target)
 {
     uint32_t target_id = target->get_rand_id_link();
     link* target_link = target->get_link_by_id(target_id);
-    
 
     uint32_t link_node_in = target_link->node_in;
     uint32_t link_node_out = target_link->node_out;
+
     node* node_in = target->get_node_by_id(link_node_in);
     node* node_out = target->get_node_by_id(link_node_out);
     uint32_t layer = node_in->layer;
@@ -200,7 +241,7 @@ void neat::change_regular_weight(genome* target)
     uint32_t target_id = target->get_rand_id_link();
     link* target_link = target->get_link_by_id(target_id);
 
-    double value = rand_double(-0.3, 0.3);
+    double value = rand_double(-0.5, 0.5);
     double weight = target_link->weight + value;
 
     if(weight < -1.0 || weight > 1.0)
@@ -215,17 +256,20 @@ void neat::configure_species()
 {
     spc.set_species(&population);
     std::cout<<"set"<<std::endl;
+    #if 0
     for(uint32_t i=0; i<spc.species.size(); i++)
     {
         std::cout<<(int)i<<": "<<spc.species[i].members.size()<<std::endl;
     }
+    #endif
     spc.set_adj_fitness();
     for(uint32_t i=0; i<spc.species.size(); i++)
     {
-        std::cout<<(int)spc.species[i].offspring<<std::endl;
+        std::cout<<(int)spc.species[i].members.size()<<" "<<(int)spc.species[i].offspring<<std::endl;
     }
     std::cout<<"fit"<<std::endl;
     std::vector<genome> new_population;
+    std::cout<<"np"<<std::endl;
     spc.set_new_population(&new_population);
     std::cout<<"size: "<<new_population.size()<<std::endl;
     population = new_population;
@@ -235,4 +279,27 @@ void neat::configure_species()
 void neat::train_fitness(double fitness)
 {
     pointer->set_fitness(fitness);
+    if(round(fitness) == 4.0)
+    {
+        winner = new genome(pointer, 1);
+    }
+}
+
+void neat::test_crosover()
+{
+    uint32_t id_1 = rand_uint(num_population);
+    uint32_t id_2;
+    do
+    {
+        id_2 = rand_uint(num_population);
+    } while (id_1 == id_2);
+
+    genome *p1 = &population[id_1];
+    genome *p2 = &population[id_2];
+
+    genome s1 = cross_genome(p1, p2, 10);
+
+    p1->show_genome_path();
+    p2->show_genome_path();
+    s1.show_genome_path();
 }

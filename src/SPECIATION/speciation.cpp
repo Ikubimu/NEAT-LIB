@@ -1,14 +1,16 @@
 #include "../../inc/SPECIATION/speciation.hpp"
 
-speciation::speciation(uint32_t num_population, uint32_t num_outputs, uint32_t num_inputs)
+speciation::speciation(uint32_t num_population, uint32_t num_outputs, uint32_t num_inputs, uint32_t target)
 :
 population(population),
 num_population(num_population),
 num_outputs(num_outputs),
-num_inputs(num_inputs)
+num_inputs(num_inputs),
+target(target)
 {
     population = nullptr;
-    threshold = 0.3;
+    threshold = 2.0;
+    adj_threshold = 0.1;
 }
 
 void speciation::set_species(std::vector<genome> *old_population)
@@ -27,7 +29,7 @@ void speciation::set_species(std::vector<genome> *old_population)
         pivot = species[i].members[0];
         for(uint32_t j=0; j<all.size(); j++)
         {
-            double dis = calculate_distance(&all[pivot], &all[j]);
+            double dis = calculate_distance(&(*population)[pivot], &all[j]);
             if(dis<threshold)
             {
                 species[i].members.push_back(all[j].Id_pop);
@@ -138,6 +140,7 @@ double speciation::calculate_distance(genome* pivot, genome* ptr)
         std::advance(it, 1);
         if(it == map_link->end()) break;
     }
+    disjoin += (aux->get_link_map()->size() - weight_difference.size()); 
 
     n = (double)std::max(aux->get_links_size(), (uint32_t)map_link->size());
     double mean = calculate_mean(&weight_difference);
@@ -148,7 +151,6 @@ double speciation::calculate_distance(genome* pivot, genome* ptr)
 
 double calculate_mean(std::vector<double> *v)
 {
-    //std::cout<<"s: "<<v->size()<<std::endl;
     if(v->size()==0) return 0.0;
     double sum = 0;
     for(uint32_t i=0; i<v->size(); i++)
@@ -160,7 +162,9 @@ double calculate_mean(std::vector<double> *v)
 
 void speciation::set_new_population(std::vector<genome> *new_population)
 {
-    rand_offspring_population(new_population);
+    //rand_offspring_population(new_population);
+    rating_offspring_population(new_population);
+    set_new_threshold();
 }
 
 void speciation::rand_offspring_population(std::vector<genome> *new_population)
@@ -171,7 +175,16 @@ void speciation::rand_offspring_population(std::vector<genome> *new_population)
         {
             uint32_t id = species[i].members[0];
             genome *p1 = &(*population)[id];
-            new_population->push_back(genome(p1, new_population->size()));
+            for(uint32_t j=0; j<species[i].offspring; j++)
+            {
+                uint32_t rand_id;
+                do
+                {
+                rand_id = rand_uint(num_population);
+                }while(id == rand_id);
+                genome *p2 = &(*population)[rand_id];
+                new_population->push_back(cross_genome(p1, p2, new_population->size(), false));
+            }
         }
         else
         {
@@ -201,12 +214,107 @@ void speciation::rand_offspring_population(std::vector<genome> *new_population)
             uint32_t rand_id_2;
             do
             {
-            rand_id_2 = species[i].members[rand_uint(species[i].members.size())];
+            rand_id_2 = rand_uint(num_population);
             }while(rand_id_1 == rand_id_2);
             genome *p1 = &(*population)[rand_id_1];
             genome *p2 = &(*population)[rand_id_2];
             //new_population->push_back(genome(p1, new_population->size()));
             new_population->push_back(cross_genome(p1, p2, new_population->size()));
         }
+    }
+}
+
+void speciation::rating_offspring_population(std::vector<genome> *new_population)
+{
+    for(uint32_t i=0; i<species.size(); i++)
+    {
+        if(species[i].members.size()==1)
+        {
+            uint32_t id = species[i].members[0];
+            genome *p1 = &(*population)[id];
+            for(uint32_t j=0; j<species[i].offspring; j++)
+            {
+                uint32_t rand_id;
+                do
+                {
+                rand_id = rand_uint(num_population);
+                }while(id == rand_id);
+                genome *p2 = &(*population)[rand_id];
+                new_population->push_back(cross_genome(p1, p2, new_population->size()));
+            }
+        }
+        else
+        {
+            std::vector<fitness_rating> rating;
+            double mean, sum_prob = 0;
+            uint32_t size = species[i].members.size();
+            for(uint32_t j=0; j<size; j++)
+            {
+                uint32_t id = species[i].members[j];
+                double fit = (*population)[id].get_fitness();
+                mean += fit;
+                rating.push_back({fit, 0.0});
+            }
+            mean = mean/(double)rating.size();
+            //std::cout<<"media: "<<mean<<"tamaño: "<<rating.size()<<std::endl;
+            for(uint32_t j=1; j<=size; j++)
+            {
+                double prob;
+                double fit = rating[j-1].fitness;
+                if(fit>mean) prob = (fit-mean)*(fit-mean);
+                else prob = 0;
+                //std::cout<<(int)species[i].members[j-1]<<" fit: "<<fit<<" prob: "<<prob<<std::endl;
+                rating[j%size].prob = prob + sum_prob;
+                sum_prob += prob;
+            }
+            rating[0].prob = 0;
+
+            for(uint32_t j=0; j<species[i].offspring; j++)
+            {
+                uint32_t id_1, id_2;
+                id_1 = species[i].members[select_genome(&rating, sum_prob)];
+                id_2 = species[i].members[select_genome(&rating, sum_prob)];
+                //std::cout<<(int)id_1<<" "<<(int)id_2<<"-->"<<(int)new_population->size()<<std::endl;
+                #if 0
+                do
+                {
+                    id_2 = select_genome(&rating);
+                } while (id_1 == id_2);
+                #endif
+                genome *p1 = &(*population)[id_1];
+                genome *p2 = &(*population)[id_2];
+                //new_population->push_back(genome(p1, new_population->size()));
+                new_population->push_back(cross_genome(p1, p2, new_population->size()));
+            }
+        }
+    }
+    int32_t less_size = num_population - new_population->size();
+    if(less_size>0)
+    {
+        for(uint32_t i=0; i<less_size; i++)
+        {
+            uint32_t rand_id_1 = rand_uint(num_population);
+            uint32_t rand_id_2;
+            do
+            {
+            rand_id_2 = rand_uint(num_population);
+            }while(rand_id_1 == rand_id_2);
+            genome *p1 = &(*population)[rand_id_1];
+            genome *p2 = &(*population)[rand_id_2];
+            //new_population->push_back(genome(p1, new_population->size()));
+            new_population->push_back(cross_genome(p1, p2, new_population->size()));
+        }
+    }
+}
+
+void speciation::set_new_threshold()
+{
+    if(species.size()<target)
+    {
+        threshold = threshold - adj_threshold;
+    }
+    else
+    {
+        threshold = threshold + adj_threshold;
     }
 }
